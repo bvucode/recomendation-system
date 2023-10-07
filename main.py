@@ -6,7 +6,6 @@ from nlp.tokenize import Tokenize
 
 cold = 0
 history = []
-historyind = []
 dlist = []
 
 with open("data.json", "r") as file:
@@ -24,12 +23,12 @@ f = Fit(dlist, vect)
 fr = f.fit()
 while True:
     tlist = []
+    tlist2 = []
     wlist = []
     result = []
     if cold == 0: 
         print("Recomendation movie: ", data[0])
-        history.append(dlist[0])
-        historyind.append(0)
+        history.append(0)
         inp = input("continue?(y/n) ")
         if inp == "y":
             cold = 1
@@ -38,22 +37,24 @@ while True:
     else:
         if len(history) == 1:
             for i in history:
-                for j in i:
+                for j in dlist[i]:
                     wlist.append(1)
         else:
-            ivect2 = WordVector(history)
+            for i in history:
+                tlist.append(dlist[i])
+            ivect2 = WordVector(tlist)
             vect2 = ivect2.load()
-            f2 = Fit(history, vect2)
+            f2 = Fit(tlist, vect2)
             fr2 = f2.fit()
             for i in fr2:
                 for j in i:
                     wlist.append(j)
         for i in history:
-            for j in i:
-                tlist.append(j)
+            for j in dlist[i]:
+                tlist2.append(j)
         for y, i in enumerate(dlist):
             tmplist = []
-            for j in tlist:
+            for j in tlist2:
                 for x, k in enumerate(i):
                     if k == j:
                         tmplist.append(fr[y][x])
@@ -62,11 +63,10 @@ while True:
             result.append((y, cw))
         result.sort(key = lambda x: x[1])
         for i in reversed(result):
-            if i[0] not in historyind:
-                history.append(dlist[i[0]])
-                historyind.append(i[0])
+            if i[0] not in history:
+                history.append(i[0])
                 print("Recomendation movie: ", data[i[0]])
-                if len(historyind) != len(dlist):
+                if len(history) != len(dlist):
                     inp2 = input("continue?(y/n) ")
                     if inp2 == "y":
                         break
